@@ -1,0 +1,290 @@
+#include "lysic.h"
+
+char line_data[256]="";                //储存读取的行数据
+KK *p=NULL,*head=NULL;
+/*******************************
+
+功能:创建一个新节点，插入尾端
+
+返回值:无
+
+*******************************/
+void KK_CREATE(KK **p)
+{
+    if(*p==NULL)
+    {
+        KK *head=(KK *)malloc(sizeof(KK));
+        head->t=(TIME *)malloc(sizeof(TIME));
+        head->next=NULL;
+        head->prev=NULL;
+        *p=head;
+    }
+    else
+    {
+        KK *head=*p;
+        KK *current=NULL;
+        while(head->next!=NULL)
+            head=head->next;
+        current=static_cast<KK *>(malloc(sizeof(KK)));
+        current->t=static_cast<TIME *>(malloc(sizeof(TIME)));
+        current->next=NULL;
+        current->prev=head;
+        head->next=current;
+    }
+}
+/*******************************
+
+功能:传入读取到的字符串，将时间和歌词分割存入到链表中
+
+返回值:无
+
+*******************************/
+void SRC_HANDLE(char *s,KK *head)
+{
+    int a,b;
+    int n=1,i=0;
+    char str[128];
+    while(*s=='[')
+    {
+        if(n==1)
+        {
+            sscanf(s+1,"%[^]]",str);
+            sscanf(str,"%2d:%2d.%2d",&a,&b);
+            head
+            n=0;
+        }
+        while(*s!=']')
+            s++;
+        s++;
+    }
+    while(*s!='\n')
+    {
+        head->src[i++]=*s;
+        s++;
+    }
+//sscanf(s,"%[^ ]",head->src);
+}
+/*******************************
+
+功能:链表排序
+
+返回值:无
+
+*******************************/
+void SRC_SORT(KK **p)
+{
+        KK	*head=*p,*current=NULL;
+        for(head;head->next!=NULL;head=head->next)
+        {
+            for(current=head->next;current!=NULL;current=current->next)
+            {
+                if((head->t->h*60+head->t->m)>(current->t->h*60+current->t->m))
+                {
+                        KK tmp;
+                        tmp=*head;
+                        *head=*current;
+                        *current=tmp;
+
+                        tmp.prev=head->prev;
+                        tmp.next=head->next;
+                        head->prev=current->prev;
+                        head->next=current->next;
+                        current->prev=tmp.prev;
+                        current->next=tmp.next;
+                }
+            }
+        }
+}
+/*******************************
+
+功能:判断文件是否到结尾处，从文件中读取一行数据并调用SRC_HANDLE(char*,KK *head);
+
+返回值:无
+
+*******************************/
+void GET_SRC(FILE *fp,KK *p)
+{
+    KK *head=NULL;
+    while(feof(fp)==0)
+    {
+        KK_CREATE(&p);
+        head=p;
+        while(head->next!=NULL)
+        head=head->next;
+        fgets(line_data,sizeof(line_data),fp);
+        //puts(buf);
+        SRC_HANDLE(line_data,head);
+        if(line_data[10]=='[')
+        {
+        KK_CREATE(&p);
+        head=p;
+        while(head->next!=NULL)
+        head=head->next;
+        SRC_HANDLE(line_data+10,head);
+        }
+        if(line_data[20]=='[')
+        {
+        KK_CREATE(&p);
+        head=p;
+        while(head->next!=NULL)
+        head=head->next;
+        SRC_HANDLE(line_data+20,head);
+        }
+    }
+}
+/*******************************
+
+功能:显示节点前五个节点和后五个节点的数据
+
+返回值:无
+
+*******************************/
+void DIS_SRC(TIME *h,KK *p,KK *head)
+{
+        TIME clock=*h;
+        printf("\t\t\t\t\t\t\t\t\t\t歌名:%s\n",p->src);
+        printf("\t\t\t\t\t\t\t\t\t\t歌手:%s\n",p->next->src);
+        printf("\t\t\t\t\t\t\t\t\t\t专辑:%s\n",p->next->next->src);
+        printf("\t\t\t\t\t\t\t\t\t\t制作:%s\n",p->next->next->next->src);
+        printf("\t\t\t\t\t\t\t\t\t\t    %02d:%02d\n",clock.h,clock.m);//cusor_get_pos(); cusor_show();
+        if(head->prev!=NULL)
+        {
+        if(head->prev->prev!=NULL)
+        {
+        if(head->prev->prev->prev!=NULL)
+        {
+        if(head->prev->prev->prev->prev!=NULL)
+        {
+        if(head->prev->prev->prev->prev->prev!=NULL)
+        {
+        if(head->prev->prev->prev->prev->prev->prev!=NULL)
+        {
+            printf("\t\t\t\t\t\t\t\t\t\t%s\n",head->prev->prev->prev->prev->prev->src);
+            printf("\t\t\t\t\t\t\t\t\t\t%s\n",head->prev->prev->prev->prev->src);
+            printf("\t\t\t\t\t\t\t\t\t\t%s\n",head->prev->prev->prev->src);
+            printf("\t\t\t\t\t\t\t\t\t\t%s\n",head->prev->prev->src);
+            printf("\t\t\t\t\t\t\t\t\t\t%s\n",head->prev->src);
+        }
+        }
+        else
+        {
+            printf("\t\t\t\t\t\t\t\t\t\t%s\n",head->prev->prev->prev->prev->src);
+            printf("\t\t\t\t\t\t\t\t\t\t%s\n",head->prev->prev->prev->src);
+            printf("\t\t\t\t\t\t\t\t\t\t%s\n",head->prev->prev->src);
+            printf("\t\t\t\t\t\t\t\t\t\t%s\n",head->prev->src);
+        }
+        }
+        else
+        {
+            printf("\t\t\t\t\t\t\t\t\t\t%s\n",head->prev->prev->prev->src);
+            printf("\t\t\t\t\t\t\t\t\t\t%s\n",head->prev->prev->src);
+            printf("\t\t\t\t\t\t\t\t\t\t%s\n",head->prev->src);
+        }
+        }
+        else
+        {
+            printf("\t\t\t\t\t\t\t\t\t\t%s\n",head->prev->prev->src);
+            printf("\t\t\t\t\t\t\t\t\t\t%s\n",head->prev->src);
+        }
+        }
+        else
+        {
+            printf("\t\t\t\t\t\t\t\t\t\t%s\n",head->prev->src);
+        }
+        }
+
+        printf("\t\t\t\t\t\t\t\t\t\t%s\n",head->src);
+        if(head->next!=NULL)
+        {
+        printf("\t\t\t\t\t\t\t\t\t\t%s\n",head->next->src);
+        if(head->next->next!=NULL)
+        {
+        printf("\t\t\t\t\t\t\t\t\t\t%s\n",head->next->next->src);
+        if(head->next->next->next!=NULL)
+        {
+        printf("\t\t\t\t\t\t\t\t\t\t%s\n",head->next->next->next->src);
+        if(head->next->next->next->next!=NULL)
+        {
+        printf("\t\t\t\t\t\t\t\t\t\t%s\n",head->next->next->next->next->src);
+        if(head->next->next->next->next->next!=NULL)
+        {
+        printf("\t\t\t\t\t\t\t\t\t\t%s\n",head->next->next->next->next->next->src);
+        }}}}}
+}
+/*******************************
+
+功能:显示歌词，调用DIS_SRC(TIME *h,KK *p,KK *head)
+
+返回值:无
+
+*******************************/
+void DISPLAY(TIME *h,KK *p)
+{
+        KK *head=p;
+        TIME clock=*h;
+
+        if(clock.h==0&&clock.m==0)
+        {
+
+            printf("\t\t\t\t\t\t\t\t\t\t歌名:%s\n",p->src);
+            printf("\t\t\t\t\t\t\t\t\t\t歌手:%s\n",p->next->src);
+            printf("\t\t\t\t\t\t\t\t\t\t专辑:%s\n",p->next->next->src);
+            printf("\t\t\t\t\t\t\t\t\t\t制作:%s\n",p->next->next->next->src);
+        }
+
+            printf("\t\t\t\t\t\t\t\t\t\t    %02d:%02d\n",clock.h,clock.m);
+        while(head!=NULL)
+        {
+            if((head->t->h==clock.h)&&(head->t->m==clock.m))
+            {
+                DIS_SRC(&clock,p,head);
+            }
+        head=head->next;
+
+        }
+}
+/*******************************
+
+功能:读取最后一句歌词的时间点
+
+返回值:无
+
+*******************************/
+void END_OF_SRC(KK *p)
+{
+    /*while(p!=NULL)
+    {
+    if((((p->t->h*60)+p->t->m)*100+p->t->s)>(((x*60)+y)*100+z))
+    {
+        x=p->t->h;
+        y=p->t->m;
+        z=p->t->s;
+    }
+        p=p->next;
+    }*/
+}
+
+int lysic_catch()
+{
+    FILE *fp=fopen("/home/lzx/mp_music/a.lrc","r");
+    if(fp==NULL)
+    {
+        perror("fopen");
+    }
+    for(int i=0;i<4;i++)          //读取前四句歌词
+    {
+        KK_CREATE(&p);
+        head=p;
+        while(head->next!=NULL)
+            head=head->next;
+        fgets(line_data,sizeof(line_data),fp);
+        sscanf(line_data+4,"%[^]]",head->src);
+    }
+    GET_SRC(fp,p);                 //获取并分割歌词
+    fclose(fp);
+    head=p;
+    SRC_SORT(&p);                  //链表排序
+    END_OF_SRC(p);
+    return 0;
+}
+
